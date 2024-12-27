@@ -1,35 +1,16 @@
 import React, { useState, useEffect } from 'react';
 
 const Timer = () => {
-  const [workTime, setWorkTime] = useState(45 * 60);
-  const [breakTime, setBreakTime] = useState(15 * 60);
-  const [timeLeft, setTimeLeft] = useState(workTime);
-  const [isActive, setIsActive] = useState(false);
-  const [isWorkMode, setIsWorkMode] = useState(true);
+  const savedState = JSON.parse(localStorage.getItem('timerState')) || {};
+
+  const [workTime, setWorkTime] = useState(savedState.workTime || 45 * 60);
+  const [breakTime, setBreakTime] = useState(savedState.breakTime || 15 * 60);
+  const [timeLeft, setTimeLeft] = useState(savedState.timeLeft || savedState.workTime || 45 * 60);
+  const [isActive, setIsActive] = useState(savedState.isActive || false);
+  const [isWorkMode, setIsWorkMode] = useState(savedState.isWorkMode || true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(savedState.isDarkMode || false);
 
-  useEffect(() => {
-    const savedState = localStorage.getItem('timerState');
-    if (savedState) {
-      const {
-        workTime: savedWorkTime,
-        breakTime: savedBreakTime,
-        timeLeft: savedTimeLeft,
-        isActive: savedIsActive,
-        isWorkMode: savedIsWorkMode,
-        isDarkMode: savedIsDarkMode,
-      } = JSON.parse(savedState);
-
-      setWorkTime(savedWorkTime || 45 * 60);
-      setBreakTime(savedBreakTime || 15 * 60);
-      setTimeLeft(savedTimeLeft || savedWorkTime || 45 * 60);
-      setIsActive(savedIsActive || false);
-      setIsWorkMode(savedIsWorkMode || true);
-      setIsDarkMode(savedIsDarkMode || false);
-    }
-  }, []);
-  
   useEffect(() => {
     const timerState = {
       workTime,
