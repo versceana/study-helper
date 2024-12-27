@@ -8,12 +8,13 @@ import {
 import Home from './pages/Home';
 import Calendar from './pages/Calendar';
 import Timer from './components/Timer';
+import TaskList from './components/TaskList';
 
 function App() {
   return (
     <Router>
         <Routes>
-          <Route path="/" element={<Timer />} />
+          <Route path="/" element={<TaskList />} />
           <Route path="/calendar" element={<Calendar />} />
         </Routes>
     </Router>
