@@ -1,42 +1,47 @@
 import React, { useState, useEffect } from 'react';
 
-const PomodoroTimer = () => {
-  const [workTime, setWorkTime] = useState(45 * 60); // Время работы в секундах
-  const [breakTime, setBreakTime] = useState(15 * 60); // Время отдыха в секундах
-  const [timeLeft, setTimeLeft] = useState(workTime); // Оставшееся время
-  const [isActive, setIsActive] = useState(false); // Активен ли таймер
-  const [isWorkMode, setIsWorkMode] = useState(true); // Режим работы или отдыха
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Открыты ли настройки
-  const [isDarkMode, setIsDarkMode] = useState(false); // Темная тема
+const Timer = () => {
+  const [workTime, setWorkTime] = useState(45 * 60);
+  const [breakTime, setBreakTime] = useState(15 * 60);
+  const [timeLeft, setTimeLeft] = useState(workTime);
+  const [isActive, setIsActive] = useState(false);
+  const [isWorkMode, setIsWorkMode] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Загрузка состояния из localStorage
   useEffect(() => {
-    const savedWorkTime = localStorage.getItem('workTime');
-    const savedBreakTime = localStorage.getItem('breakTime');
-    const savedTimeLeft = localStorage.getItem('timeLeft');
-    const savedIsActive = localStorage.getItem('isActive');
-    const savedIsWorkMode = localStorage.getItem('isWorkMode');
-    const savedIsDarkMode = localStorage.getItem('isDarkMode');
+    const savedState = localStorage.getItem('timerState');
+    if (savedState) {
+      const {
+        workTime: savedWorkTime,
+        breakTime: savedBreakTime,
+        timeLeft: savedTimeLeft,
+        isActive: savedIsActive,
+        isWorkMode: savedIsWorkMode,
+        isDarkMode: savedIsDarkMode,
+      } = JSON.parse(savedState);
 
-    if (savedWorkTime) setWorkTime(parseInt(savedWorkTime));
-    if (savedBreakTime) setBreakTime(parseInt(savedBreakTime));
-    if (savedTimeLeft) setTimeLeft(parseInt(savedTimeLeft));
-    if (savedIsActive) setIsActive(savedIsActive === 'true');
-    if (savedIsWorkMode) setIsWorkMode(savedIsWorkMode === 'true');
-    if (savedIsDarkMode) setIsDarkMode(savedIsDarkMode === 'true');
+      setWorkTime(savedWorkTime || 45 * 60);
+      setBreakTime(savedBreakTime || 15 * 60);
+      setTimeLeft(savedTimeLeft || savedWorkTime || 45 * 60);
+      setIsActive(savedIsActive || false);
+      setIsWorkMode(savedIsWorkMode || true);
+      setIsDarkMode(savedIsDarkMode || false);
+    }
   }, []);
-
-  // Сохранение состояния в localStorage
+  
   useEffect(() => {
-    localStorage.setItem('workTime', workTime);
-    localStorage.setItem('breakTime', breakTime);
-    localStorage.setItem('timeLeft', timeLeft);
-    localStorage.setItem('isActive', isActive);
-    localStorage.setItem('isWorkMode', isWorkMode);
-    localStorage.setItem('isDarkMode', isDarkMode);
+    const timerState = {
+      workTime,
+      breakTime,
+      timeLeft,
+      isActive,
+      isWorkMode,
+      isDarkMode,
+    };
+    localStorage.setItem('timerState', JSON.stringify(timerState));
   }, [workTime, breakTime, timeLeft, isActive, isWorkMode, isDarkMode]);
 
-  // Обработка таймера
   useEffect(() => {
     let interval = null;
 
@@ -54,20 +59,18 @@ const PomodoroTimer = () => {
     return () => clearInterval(interval);
   }, [isActive, timeLeft]);
 
-  // Переключение режима (работа/отдых)
   const switchMode = () => {
     if (isWorkMode) {
       setIsWorkMode(false);
       setTimeLeft(breakTime);
-      sendNotification('☕ Время отдыха!');
+      sendNotification('Время отдыха!');
     } else {
       setIsWorkMode(true);
       setTimeLeft(workTime);
-      sendNotification('⏳ Время работы!');
+      sendNotification('Время работы!');
     }
   };
 
-  // Отправка уведомлений
   const sendNotification = (message) => {
     if (Notification.permission === 'granted') {
       new Notification(message);
@@ -80,18 +83,15 @@ const PomodoroTimer = () => {
     }
   };
 
-  // Обработка кнопки старта/паузы
   const toggleTimer = () => {
     setIsActive(!isActive);
   };
 
-  // Обработка кнопки сброса
   const resetTimer = () => {
     setIsActive(false);
     setTimeLeft(isWorkMode ? workTime : breakTime);
   };
 
-  // Обработка изменения настроек
   const handleSaveSettings = (e) => {
     e.preventDefault();
     const newWorkTime = parseInt(e.target.workTime.value) * 60;
@@ -102,12 +102,10 @@ const PomodoroTimer = () => {
     setIsSettingsOpen(false);
   };
 
-  // Переключение темы
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
 
-  // Форматирование времени в MM:SS
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
@@ -115,33 +113,33 @@ const PomodoroTimer = () => {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-black'}`}>
+    <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`}>
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">{isWorkMode ? '⏳ Время работы' : '☕ Время отдыха'}</h1>
+        <h1 className="text-4xl font-bold mb-4">{isWorkMode ? '🎯 Работаем' : '🧘 Отдыхаем'}</h1>
         <div className="text-8xl font-bold mb-8">{formatTime(timeLeft)}</div>
         <div className="space-x-4">
           <button
             onClick={toggleTimer}
-            className={`px-6 py-2 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded`}
+            className={`px-6 py-2 rounded-full ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition duration-300`}
           >
             {isActive ? 'Пауза' : 'Старт'}
           </button>
           <button
             onClick={resetTimer}
-            className={`px-6 py-2 ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded`}
+            className={`px-6 py-2 rounded-full ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition duration-300`}
           >
             Сброс
           </button>
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className={`px-6 py-2 ${isDarkMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-300 hover:bg-gray-400'} rounded`}
+            className={`px-6 py-2 rounded-full ${isDarkMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-300 hover:bg-gray-400'} transition duration-300`}
           >
             ⚙️
           </button>
         </div>
         <button
           onClick={toggleTheme}
-          className="mt-8 px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          className="mt-8 px-6 py-2 rounded-full bg-gray-500 text-white hover:bg-gray-600 transition duration-300"
         >
           {isDarkMode ? 'Светлая тема' : 'Темная тема'}
         </button>
@@ -159,7 +157,7 @@ const PomodoroTimer = () => {
                     type="number"
                     name="workTime"
                     defaultValue={workTime / 60}
-                    className={`w-full p-2 border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'} rounded`}
+                    className={`w-full p-2 border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'} rounded-full`}
                   />
                 </label>
                 <label className="block">
@@ -168,18 +166,18 @@ const PomodoroTimer = () => {
                     type="number"
                     name="breakTime"
                     defaultValue={breakTime / 60}
-                    className={`w-full p-2 border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'} rounded`}
+                    className={`w-full p-2 border ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'} rounded-full`}
                   />
                 </label>
               </div>
               <div className="mt-6 space-x-4">
-                <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                <button type="submit" className="px-6 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition duration-300">
                   Сохранить
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsSettingsOpen(false)}
-                  className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                  className="px-6 py-2 rounded-full bg-gray-500 text-white hover:bg-gray-600 transition duration-300"
                 >
                   Отмена
                 </button>
@@ -192,4 +190,4 @@ const PomodoroTimer = () => {
   );
 };
 
-export default PomodoroTimer;
+export default Timer;
