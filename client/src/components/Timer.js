@@ -7,7 +7,7 @@ const Timer = () => {
   const [breakTime, setBreakTime] = useState(savedState.breakTime || 15 * 60);
   const [timeLeft, setTimeLeft] = useState(savedState.timeLeft || savedState.workTime || 45 * 60);
   const [isActive, setIsActive] = useState(savedState.isActive || false);
-  const [isWorkMode, setIsWorkMode] = useState(savedState.isWorkMode || true);
+  const [isWorkMode, setIsWorkMode] = useState(savedState.isWorkMode !== undefined ? savedState.isWorkMode : true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(savedState.isDarkMode || false);
 
